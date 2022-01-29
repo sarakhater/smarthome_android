@@ -1,18 +1,39 @@
 package com.iot.smarthomemasterandroid.ui.home;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class ElectricData {
+    @SerializedName("readingTime")
+    @Expose
     String readingTime;
+    @SerializedName("id")
+    @Expose
     String deviceId;
+    @SerializedName("reading")
+    @Expose
     String reading;
-    String photoURL;
+    @SerializedName("type")
+    @Expose
+    String deviceName;
+    @SerializedName("consumption")
+    @Expose
     String consumption;
+    @SerializedName("cost")
+    @Expose
     String cost;
 
-    public ElectricData(String readingTime, String deviceId, String reading, String photoURL, String consumption, String cost) {
+    public ElectricData(String deviceId, String deviceName , String reading ) {
+        this.deviceId = deviceId;
+        this.reading = reading;
+        this.deviceName = deviceName;
+    }
+
+    public ElectricData(String readingTime, String deviceId, String reading, String deviceName, String consumption, String cost) {
         this.readingTime = readingTime;
         this.deviceId = deviceId;
         this.reading = reading;
-        this.photoURL = photoURL;
+        this.deviceName = deviceName;
         this.consumption = consumption;
         this.cost = cost;
     }
@@ -41,12 +62,12 @@ public class ElectricData {
         this.reading = reading;
     }
 
-    public String getPhotoURL() {
-        return photoURL;
+    public String getDeviceName() {
+        return deviceName;
     }
 
-    public void setPhotoURL(String photoURL) {
-        this.photoURL = photoURL;
+    public void setDeviceName(String photoURL) {
+        this.deviceName = photoURL;
     }
 
     public String getConsumption() {

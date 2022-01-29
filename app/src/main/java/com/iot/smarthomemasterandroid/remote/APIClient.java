@@ -1,0 +1,82 @@
+package com.iot.smarthomemasterandroid.remote;
+
+import androidx.annotation.NonNull;
+
+import android.content.Context;
+
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+
+public class APIClient {
+    private static Retrofit retrofit = null;
+
+    static String BaseURL = "http://192.168.1.2:8090/api/";
+    static Context context;
+    public static ApiInterface getAPIClient() {
+        if (retrofit == null) {
+            Gson gson = new GsonBuilder().setLenient().create();
+            retrofit = new Retrofit
+                    .Builder()
+                    .baseUrl(BaseURL)
+                    .client(getHttpClient())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
+            System.out.println(retrofit);
+        }
+        return retrofit.create(ApiInterface.class);
+    }
+
+    private static OkHttpClient getHttpClient() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        return new OkHttpClient().newBuilder()
+                .connectTimeout(10, TimeUnit.MINUTES)
+                .addNetworkInterceptor(new AddHeaderInterceptor())
+                .addNetworkInterceptor(new StethoInterceptor())
+                .readTimeout(10, TimeUnit.MINUTES)
+                .writeTimeout(10, TimeUnit.MINUTES)
+                .addInterceptor(interceptor)
+                .build();
+
+    }
+
+    public static Retrofit getFcmRetrofit() {
+        OkHttpClient client = getHttpClient();
+        return new Retrofit.Builder()
+                .baseUrl("https://fcm.googleapis.com/")
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+    }
+
+    private static class AddHeaderInterceptor implements Interceptor {
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Request.Builder builder = chain.request().newBuilder();
+            builder.addHeader("X-Requested-With", "XMLHttpRequest");
+           // builder.addHeader("Content-Type" , "application/json");
+
+            builder.addHeader("AuthorizationHash", AuthorizationSharedHelper.getAuthorizationHash(context));
+            return chain.proceed(builder.build());
+        }
+    }
+
+}

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
+
     private HomeViewModel homeViewModel;
     private FragmentHomeBinding binding;
 
@@ -65,4 +66,5 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
 }
